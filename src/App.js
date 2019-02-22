@@ -1,25 +1,55 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import './App.css';
+import Webcam from "react-webcam"
+
 
 class App extends Component {
+
+  setRef = webcam => {
+    this.webcam = webcam;
+  };
+
+  state = {
+    pic: ""
+  }
+
+
+  capture = ()=>{
+    const imageSrc = this.webcam.getScreenshot();
+    console.log(imageSrc);
+
+    fetch('http://localhost:3000/api/v1/images', {method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },body: JSON.stringify({image:{
+      imageUrl: imageSrc
+    }
+    })
+  })
+    .then(res=>res.json())
+    .then(image=>{
+      this.setState({
+        pic: image.imageUrl
+      })
+    })
+
+  };
+
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <h1>Your Webcam</h1>
+        <Webcam
+        ref={this.setRef}
+        screenshotFormat="image/jpeg"
+        />
+        <br></br>
+        <button onClick={this.capture}>Take Photo</button>
+        <h1>Your Captured Image</h1>
+        <img src={this.state.pic} alt="oolala"/>
+        <p>Cloudinary URL: {this.state.pic}</p>
       </div>
     );
   }
